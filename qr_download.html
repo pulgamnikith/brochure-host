@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Document Preview</title>
+    <style>
+      :root {
+        --bg: #0b0f17;
+        --panel: rgba(255, 255, 255, 0.06);
+        --text: #eaf0ff;
+        --muted: rgba(234, 240, 255, 0.7);
+        --border: rgba(234, 240, 255, 0.14);
+        --accent: #5b7cfa;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          "Apple Color Emoji", "Segoe UI Emoji";
+        background: radial-gradient(1200px 800px at 20% 10%, #111a33 0%, var(--bg) 55%);
+        color: var(--text);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        background: rgba(11, 15, 23, 0.7);
+        border-bottom: 1px solid var(--border);
+      }
+      .bar {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .title {
+        font-weight: 650;
+        letter-spacing: 0.2px;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      a.button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(91, 124, 250, 0.35), rgba(91, 124, 250, 0.18));
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      a.button:hover {
+        border-color: rgba(234, 240, 255, 0.26);
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 26px 16px 44px;
+      }
+      .card {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+      }
+      .frame {
+        width: 100%;
+        height: min(78vh, 920px);
+        border: 1px solid rgba(234, 240, 255, 0.16);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .hint {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+        font-size: 0.95em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="bar">
+        <div class="title">Document Preview</div>
+        <div class="actions">
+          <a id="downloadBtn" class="button" href="#" download>Download PDF</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="card">
+        <iframe
+          id="previewFrame"
+          class="frame"
+          title="Document preview"
+          referrerpolicy="no-referrer"
+        ></iframe>
+        <p class="hint">
+          Use query params to set the PDF:
+          <code>?pdf=&lt;PDF_URL&gt;</code>
+          (optional)
+          <code>&amp;download=&lt;PDF_DOWNLOAD_URL&gt;</code>.
+        </p>
+      </div>
+    </main>
+
+    <script>
+      const DEFAULT_PDF =
+        "https://raw.githubusercontent.com/pulgamnikith/brochure-host/04d23a0a41c53201a6db2206212afc871efcfe06/Radiometery_whitepaper.pdf";
+
+      const params = new URLSearchParams(window.location.search);
+      const input = params.get("pdf") || params.get("url") || DEFAULT_PDF;
+
+      function tryParseUrl(s) {
+        try {
+          return new URL(s);
+        } catch {
+          return null;
+        }
+      }
+
+      function extractPdfFromGview(maybeGviewUrl) {
+        const u = tryParseUrl(maybeGviewUrl);
+        if (!u) return null;
+        if (u.hostname !== "docs.google.com") return null;
+        if (!u.pathname.startsWith("/gview")) return null;
+        const raw = u.searchParams.get("url");
+        return raw || null;
+      }
+
+      const extractedPdf = extractPdfFromGview(input);
+      const pdf = extractedPdf || input;
+      const download = params.get("download") || pdf;
+
+      const gview =
+        "https://docs.google.com/gview?embedded=true&url=" +
+        encodeURIComponent(pdf);
+
+      const frame = document.getElementById("previewFrame");
+      const dl = document.getElementById("downloadBtn");
+
+      frame.src = gview;
+      dl.href = download;
+      dl.setAttribute("download", "");
+    </script>
+  </body>
+</html>
+
